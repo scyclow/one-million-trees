@@ -18,7 +18,6 @@ contract SVGRenderer {
     int y;
   }
 
-
   struct Token {
     uint256 tokenId;
     uint256 baseSeed;
@@ -30,10 +29,7 @@ contract SVGRenderer {
     nftContract = OneMillionTrees(msg.sender);
   }
 
-  // function isBurnt(uint256 tokenId) public view returns (bool) {
-  //   return true;
-  //   // return !nftContract.exists(tokenId) && tokenId < nftContract.totalMinted();
-  // }
+
 
   function tokenURI(uint256 tokenId) external view returns (string memory) {
     string memory tokenString = Strings.toString(tokenId);
@@ -107,49 +103,6 @@ contract SVGRenderer {
       ));
     }
 
-
-    // } else if ((seed % 10) < 5) {
-      // s = string(abi.encodePacked(
-      //   'S',
-      //   Strings.toString(uint(cStart.x + cEnd.x)*400 /1000),
-      //   ' ',
-      //   Strings.toString(uint(cStart.y + cEnd.y)*400/1000)
-      // ));
-    // } else
-
-
-    // // } else if ((seed % 6) == 1) {
-    // } else if ((seed % 10) < 8) {
-
-
-
-
-
-
-    // } else {
-      // s = string(abi.encodePacked(
-      //   'S',
-      //   Strings.toString(uint(cStart.x + cEnd.x)*(400 + rnd(uint256(keccak256(abi.encodePacked(seed, level))), 3, 30)/5)/1000),
-      //   ' ',
-      //   Strings.toString(uint(cStart.y + cEnd.y)*(400 + rnd(uint256(keccak256(abi.encodePacked(seed, level))), 3, 33)/5)/1000)
-      // ));
-    // }
-
-    // } else if (seed % 6 == 3) {
-
-    // } else {
-    // if (seed % 6 == 4) {
-      // s = '';
-    // } else if (seed % 6 == 5) {
-      // s = level > 6 ? string(abi.encodePacked(
-      //   'S',
-      //   Strings.toString(uint(cStart.x + cEnd.x)*(550 + rnd(uint256(keccak256(abi.encodePacked(seed, level))), 2, 30)/5)/1000),
-      //   ' ',
-      //   Strings.toString(uint(cStart.y + cEnd.y)*(550 + rnd(uint256(keccak256(abi.encodePacked(seed, level))), 2, 33)/5)/1000)
-      // )) : '' ;
-    // }
-
-
     string memory markup = path(cStart, cEnd, s, 8 - level, level > 6, token.burnt);
 
     if (level <= 7) {
@@ -192,7 +145,6 @@ contract SVGRenderer {
     }
 
     return markup;
-
   }
 
   function path(Coords memory c1, Coords memory c2, string memory s, uint256 strokeWidth, bool isLeaf, bool burnt) pure public returns (string memory) {
