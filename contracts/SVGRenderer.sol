@@ -45,8 +45,9 @@ contract SVGRenderer {
 
     return string(abi.encodePacked(
       'data:application/json;utf8,'
-      '{"name": "One Million Trees: Tree #', tokenString,
-      '", "description": "One Million Trees, planted to satisfy the conditions of Smart Burn Contract #7 (TreeHugger), deployed at 0x4febe040d13dbddcca8aa675481314264339e857 on Ethereum L1, in which the owner must plant one million trees within 2 years from the date of purchase (12/29/22).'
+      '{"name": "ONE MILLION TREES: Tree #', tokenString,
+      '", "description": "Pursuant to the terms and conditions outlined in Smart Burn Contract #7 (deployed at 0x4febe040d13dbddcca8aa675481314264339e857 on Ethereum L1), the owner has successfully planted one million trees within 2 years of the initial purchase date (12/29/22), thus satisfying his contractual obligation.'
+      '", "license": "CC0'
       '", "image": "', encodedSVG,
       '", "external_url": "https://steviep.xyz/one-million-trees'
       '"}'

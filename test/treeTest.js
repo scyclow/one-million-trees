@@ -82,12 +82,12 @@ describe('OneMillionTrees', () => {
       expect(num(await OneMillionTrees.connect(planter).totalSupply())).to.equal(9)
     })
 
-    it.only('only owner should be able to update uri contract', async () => {
+    it('only owner should be able to update uri contract', async () => {
 
       await OneMillionTrees.connect(planter).plant(30_000)
-      console.log(
-        getSVG(await OneMillionTrees.connect(planter).tokenURI(0))
-      )
+      // console.log(
+      //   getSVG(await OneMillionTrees.connect(planter).tokenURI(0))
+      // )
 
       await OneMillionTrees.connect(planter).setTokenURI(rando.address)
       await expectRevert(
