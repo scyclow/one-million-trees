@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>View Tree</title>
+  <meta name="description" content="To view a tree, use the treeId query param in the url (ex. ?treeId=1)">
+  <link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQAAAAIAAAADAAAAAwADAAQAAwAXFhUAAQABAAIAAQADAAEABAABAAIBAAAEAQMAAQACAAIAAgADAAIAAgEBAAMBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAggBAAgICQcJCAgICgkIDAcGBwICAgIJCQgICAkIAw8HCAcDCAIIAQgICQIJAgIJCAIHCAIQAggCEAEICAIDAwEICAIBAAIJAgIDAwMICgkJAggJCAgICAkJAggQAwIJCAgCAgIJAgEIAgEBCQMICgEIAgICAggJBwECAg8IEAQCCAgHCQIIAgIIEAgDCAgJCAEBAAgCEQICAQECAgIJBwgBCAcBAQgCCAEABwECCQIIAggCCAgIAggCBwICCQcDAgMCCAIBAwICAQMJCQkJCgMHBwgCAgICAggLEAgIAggICA8IDQkODwgJAgkJDw8FCAgCEAgICAgIDggCCQ4PCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" rel="icon" type="image/x-icon" />
+
+  <style type="text/css">
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #aaa
+    }
+
+    button {
+      cursor: pointer;
+      padding:  0.25em 0.5em;
+      font-size: 2em;
+    }
+
+    #renderedTree {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #svg {
+      max-width: 90vw;
+      max-height: 90vh;
+      box-shadow: 0 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <connect-wallet>
+    <div slot="connected">
+      <div id="renderedTree"></div>
+    </div>
+
+    <div slot="notConnected">
+      <div style="margin-top: 2em">
+        <connect-button>
+          <button id="connectButton" slot="button" style="margin-top: 1em;">Connect Wallet</button>
+        </connect-button>
+      </div>
+    </div>
+
+    <div slot="noWeb3">
+    </div>
+  </connect-wallet>
+</body>
+
+  <script src="./utils.js"></script>
+
+  <script type="module" src="./connectWallet.js"></script>
+
+  <script type="module">
+    import {$, queryParams} from './$.js'
+    import {provider} from './eth.js'
+
+    const CONTRACTS = {
+      TREES: {
+        addr: {
+          arbitrum: '0x59e71de66744d1a176d0154b712161562DD03C35'
+        },
+        abi: [`function isBurnt(uint256 tokenId) external view returns (bool)`]
+      },
+      TREES_RENDERER: {
+        addr: {
+          arbitrum: '0x099F4E6b158C69448cA186FbBd15535AB834C88A'
+        },
+        abi: [`function render(uint256 tokenId, bool burnt) external view returns (string)`]
+      }
+    }
+
+    const treeId = queryParams.id || queryParams.tokenId || queryParams.treeId || Math.floor(Math.random() * 1000000)
+
+
+    provider.setContractInfo(CONTRACTS)
+
+
+    provider.onConnect(async (addr) => {
+      try {
+        const { TREES_RENDERER, TREES } = await provider.getContracts()
+        const isBurnt = await TREES.isBurnt(treeId)
+        const svg = await TREES_RENDERER.render(treeId, isBurnt)
+
+        console.log('TREE:', treeId)
+        console.log('IS BURNT:', isBurnt)
+
+        const $renderedTree = $.id('renderedTree')
+        $.render(renderedTree, svg)
+
+
+
+        window.onkeypress = function(e) {
+          if (e.code === 'Space') {
+            const serializer = new XMLSerializer()
+            const el = $.id('svg')
+
+            const source = '<?xml version="1.0" standalone="no"?>\r\n' + serializer.serializeToString(el)
+            const a = document.createElement("a")
+            a.href = "data:image/svg+xmlcharset=utf-8,"+encodeURIComponent(source)
+            a.download = `TREE-${treeId}.svg`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    })
+  </script>
+</html>
